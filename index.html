@@ -1,0 +1,359 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5b35d5">
+  <meta name="description" content="Dukaan AI helps small businesses create marketing drafts in Indian languages.">
+  <title>Dukaan AI — Smart Business Marketing</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f5f3fc;
+      color: #241c38;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: linear-gradient(135deg, #5b35d5, #8765ed);
+      color: white;
+      padding: 27px 20px;
+      border-radius: 0 0 25px 25px;
+    }
+
+    header h1 {
+      font-size: 30px;
+      margin: 0 0 8px;
+    }
+
+    header p {
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    main {
+      max-width: 620px;
+      margin: 22px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 17px;
+      border-radius: 18px;
+      box-shadow: 0 5px 22px #35205e0d;
+    }
+
+    h2 { margin-top: 0; }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 16px 0 7px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #dcd5ed;
+      border-radius: 10px;
+      font: inherit;
+      background: white;
+      color: #241c38;
+    }
+
+    textarea { resize: vertical; }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      padding: 13px 16px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #5b35d5;
+      color: white;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .secondary {
+      background: #eee8ff;
+      color: #4b2ab6;
+      margin-top: 12px;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #ad99ff;
+      outline-offset: 2px;
+    }
+
+    .hint {
+      color: #716a80;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    #result {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.75;
+    }
+
+    .notice {
+      padding: 12px;
+      background: #f5f1ff;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      color: #716a80;
+      font-size: 12px;
+      padding: 10px 18px 25px;
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>✨ Dukaan AI</h1>
+    <p>Smart marketing made simple for Indian businesses.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Create an advertisement</h2>
+      <p class="hint">
+        Enter your product details and create a marketing draft.
+        Review the draft before sharing it.
+      </p>
+
+      <form id="adForm">
+        <label for="product">Product name *</label>
+        <input
+          id="product"
+          name="product"
+          placeholder="e.g. Handmade chocolate"
+          maxlength="100"
+          required
+        >
+
+        <label for="price">Price (optional)</label>
+        <input
+          id="price"
+          name="price"
+          placeholder="e.g. ₹100 per box"
+          maxlength="60"
+        >
+
+        <label for="benefit">Main product benefit *</label>
+        <textarea
+          id="benefit"
+          name="benefit"
+          placeholder="e.g. Made fresh locally"
+          maxlength="500"
+          rows="3"
+          required
+        ></textarea>
+
+        <label for="language">Choose language</label>
+        <select id="language" name="language">
+          <option value="en">English</option>
+          <option value="hi">Hindi (हिन्दी)</option>
+          <option value="or">Odia (ଓଡ଼ିଆ)</option>
+        </select>
+
+        <button class="primary" type="submit">
+          ✨ Generate advertisement
+        </button>
+      </form>
+    </section>
+
+    <section class="card" id="resultCard" hidden>
+      <h2>Your marketing draft</h2>
+      <div id="result"></div>
+
+      <button class="secondary" id="copyButton" type="button">
+        📋 Copy advertisement
+      </button>
+
+      <p id="status" class="hint" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <h3>About Dukaan AI</h3>
+      <p class="hint">
+        This starter version creates drafts using built-in templates.
+        It does not connect to an AI model yet. Always check product
+        claims and prices before publishing your advertisement.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Dukaan AI · Made for small businesses in India
+  </footer>
+
+  <script>
+    "use strict";
+
+    const translations = {
+      en: {
+        title: "Discover {p}!",
+        benefit: "Product benefit: {b}",
+        price: "Price: {v}",
+        message: "Looking for {p}? Here is something to explore: {b}",
+        description: "{p} — {b}",
+        action: "Interested? Contact us to learn more.",
+        whatsapp: "WhatsApp promotional message"
+      },
+
+      hi: {
+        title: "{p} के बारे में जानें!",
+        benefit: "उत्पाद की खासियत: {b}",
+        price: "कीमत: {v}",
+        message: "{p} के बारे में जानें। {b}",
+        description: "{p} — {b}",
+        action: "अधिक जानकारी के लिए हमसे संपर्क करें।",
+        whatsapp: "व्हाट्सऐप प्रचार संदेश"
+      },
+
+      or: {
+        title: "{p} ବିଷୟରେ ଜାଣନ୍ତୁ!",
+        benefit: "ଉତ୍ପାଦର ବିଶେଷତା: {b}",
+        price: "ମୂଲ୍ୟ: {v}",
+        message: "{p} ବିଷୟରେ ଜାଣନ୍ତୁ। {b}",
+        description: "{p} — {b}",
+        action: "ଅଧିକ ସୂଚନା ପାଇଁ ଆମ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।",
+        whatsapp: "ହ୍ୱାଟ୍ସଆପ୍ ପ୍ରଚାର ବାର୍ତ୍ତା"
+      }
+    };
+
+    function fill(template, product, benefit, price) {
+      return template
+        .replaceAll("{p}", product)
+        .replaceAll("{b}", benefit)
+        .replaceAll("{v}", price);
+    }
+
+    const form = document.getElementById("adForm");
+    const resultCard = document.getElementById("resultCard");
+    const result = document.getElementById("result");
+    const status = document.getElementById("status");
+    const copyButton = document.getElementById("copyButton");
+
+    let currentOutput = "";
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const product =
+        document.getElementById("product").value.trim();
+
+      const benefit =
+        document.getElementById("benefit").value.trim();
+
+      const price =
+        document.getElementById("price").value.trim();
+
+      const language =
+        document.getElementById("language").value;
+
+      if (!product || !benefit) {
+        status.textContent =
+          "Please enter the product name and main benefit.";
+        resultCard.hidden = false;
+        return;
+      }
+
+      const t = translations[language] || translations.en;
+
+      const lines = [
+        fill(t.title, product, benefit, price),
+        "",
+        fill(t.benefit, product, benefit, price)
+      ];
+
+      if (price) {
+        lines.push(fill(t.price, product, benefit, price));
+      }
+
+      lines.push(
+        "",
+        "--- " + t.whatsapp + " ---",
+        fill(t.message, product, benefit, price),
+        "",
+        t.action,
+        "",
+        "--- Product description ---",
+        fill(t.description, product, benefit, price)
+      );
+
+      currentOutput = lines.join("\n");
+
+      // textContent displays user input as text, not HTML.
+      result.textContent = currentOutput;
+      resultCard.hidden = false;
+      status.textContent =
+        "Draft created. Please review it before sharing.";
+
+      resultCard.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+
+    copyButton.addEventListener("click", async function () {
+      if (!currentOutput) {
+        status.textContent = "Generate a draft first.";
+        return;
+      }
+
+      try {
+        if (
+          navigator.clipboard &&
+          window.isSecureContext
+        ) {
+          await navigator.clipboard.writeText(currentOutput);
+        } else {
+          const temporary = document.createElement("textarea");
+          temporary.value = currentOutput;
+          temporary.style.position = "fixed";
+          temporary.style.left = "-9999px";
+          document.body.appendChild(temporary);
+          temporary.select();
+
+          const success = document.execCommand("copy");
+          temporary.remove();
+
+          if (!success) {
+            throw new Error("Copy not available");
+          }
+        }
+
+        status.textContent =
+          "Copied! You can paste the text into your message.";
+      } catch (error) {
+        status.textContent =
+          "Automatic copy failed. Please select and copy the draft manually.";
+      }
+    });
+  </script>
+</body>
+</html>
